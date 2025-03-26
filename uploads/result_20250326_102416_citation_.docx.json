@@ -1,0 +1,5 @@
+{
+  "status": "error",
+  "error": "string indices must be integers, not 'str'",
+  "filename": "citation_.docx"
+}
