@@ -3,340 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Results - Ransomware Detection</title>
+    <title>Analysis Results</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
+            padding: 20px;
             color: #333;
         }
         .container {
-            max-width: 1000px;
-            margin: 30px auto;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: #f9f9f9;
+            border-radius: 5px;
         }
         h1 {
             color: #2c3e50;
-            text-align: center;
-            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 10px;
+            border-radius: 4px;
         }
         .file-info {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        .result-card {
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #f8f9fa;
-        }
-        .threat-level {
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
             margin: 20px 0;
-        }
-        .critical {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .high {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .medium {
-            background-color: #cce5ff;
-            color: #004085;
-            border: 1px solid #b8daff;
-        }
-        .low {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .indicator {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-left: 4px solid #3498db;
-        }
-        .positive {
-            border-left-color: #dc3545;
-            background-color: #f8f9fa;
-        }
-        .negative {
-            border-left-color: #28a745;
-        }
-        .actions {
-            background-color: #e2e3e5;
             padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
+            background: #eaf2f8;
+            border-radius: 4px;
+        }
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .label {
+            font-weight: bold;
+            color: #2c3e50;
         }
         .btn {
             display: inline-block;
-            background-color: #3498db;
+            background: #3498db;
             color: white;
             padding: 8px 15px;
             text-decoration: none;
             border-radius: 4px;
-            margin-right: 10px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        .json-toggle {
             margin-top: 20px;
-        }
-        .json-data {
-            display: none;
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-family: monospace;
-            white-space: pre;
-        }
-        .tab {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
-            border-radius: 5px 5px 0 0;
-        }
-        .tab button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 10px 16px;
-            transition: 0.3s;
-        }
-        .tab button:hover {
-            background-color: #ddd;
-        }
-        .tab button.active {
-            background-color: #3498db;
-            color: white;
-        }
-        .tabcontent {
-            display: none;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Ransomware Analysis Results</h1>
-        <div class="file-info">
-            Analyzed file: <strong>{{ filename }}</strong>
-        </div>
         
-        {% if result.status == "error" %}
-            <div class="threat-level critical">
-                Analysis Error: {{ result.error }}
+        {% if result.get('status') == 'error' %}
+            <div class="error">
+                <h2>Analysis Error</h2>
+                <p>File: {{ result.get('filename', 'Unknown') }}</p>
+                <p>Error: {{ result.get('error', 'Unknown error') }}</p>
             </div>
         {% else %}
-            <!-- Threat Level Card -->
-            <div class="threat-level {% if result.detection.confidence_score >= 0.9 %}critical
-                                  {% elif result.detection.confidence_score >= 0.7 %}high
-                                  {% elif result.detection.confidence_score >= 0.5 %}medium
-                                  {% else %}low{% endif %}">
-                Threat Level: 
-                {% if result.detection.confidence_score >= 0.9 %}CRITICAL
-                {% elif result.detection.confidence_score >= 0.7 %}HIGH
-                {% elif result.detection.confidence_score >= 0.5 %}MEDIUM
-                {% else %}LOW{% endif %}
-                <br>
-                Confidence Score: {{ "%.2f"|format(result.detection.confidence_score * 100) }}%
+            <div class="file-info">
+                <h2>Analyzed file: {{ result.get('filename', 'Unknown') }}</h2>
             </div>
             
-            <!-- Tabs -->
-            <div class="tab">
-                <button class="tablinks active" onclick="openTab(event, 'indicators')">Indicators</button>
-                <button class="tablinks" onclick="openTab(event, 'file')">File Details</button>
-                <button class="tablinks" onclick="openTab(event, 'system')">System State</button>
-                <button class="tablinks" onclick="openTab(event, 'raw')">Raw Data</button>
-            </div>
-            
-            <!-- Indicators Tab -->
-            <div id="indicators" class="tabcontent" style="display: block;">
-                <h3>File Indicators</h3>
-                <div class="indicator {% if result.detection.file_indicators.suspicious_extension %}positive{% else %}negative{% endif %}">
-                    Suspicious Extension: {% if result.detection.file_indicators.suspicious_extension %}YES{% else %}NO{% endif %}
-                </div>
-                <div class="indicator {% if result.detection.file_indicators.high_entropy %}positive{% else %}negative{% endif %}">
-                    High Entropy: {% if result.detection.file_indicators.high_entropy %}YES{% else %}NO{% endif %}
-                </div>
-                <div class="indicator {% if result.detection.file_indicators.unusual_permissions %}positive{% else %}negative{% endif %}">
-                    Unusual Permissions: {% if result.detection.file_indicators.unusual_permissions %}YES{% else %}NO{% endif %}
-                </div>
-                
-                <h3>System Indicators</h3>
-                <div class="indicator {% if result.detection.system_indicators.new_processes %}positive{% else %}negative{% endif %}">
-                    New Processes Detected: {% if result.detection.system_indicators.new_processes %}YES{% else %}NO{% endif %}
-                </div>
-                <div class="indicator {% if result.detection.system_indicators.suspicious_connections %}positive{% else %}negative{% endif %}">
-                    Suspicious Network Connections: {% if result.detection.system_indicators.suspicious_connections %}YES{% else %}NO{% endif %}
-                </div>
-            </div>
-            
-            <!-- File Details Tab -->
-            <div id="file" class="tabcontent">
-                <h3>File Information</h3>
-                <table>
-                    <tr>
-                        <th>Property</th>
-                        <th>Value</th>
-                    </tr>
-                    <tr>
-                        <td>File Path</td>
-                        <td>{{ result.profile.file_info.path }}</td>
-                    </tr>
-                    <tr>
-                        <td>File Size</td>
-                        <td>{{ result.profile.file_info.size }} bytes</td>
-                    </tr>
-                    <tr>
-                        <td>SHA-256 Hash</td>
-                        <td>{{ result.profile.file_info.hash }}</td>
-                    </tr>
-                    <tr>
-                        <td>Permissions</td>
-                        <td>{{ result.profile.file_info.permissions }}</td>
-                    </tr>
-                    <tr>
-                        <td>Last Modified</td>
-                        <td>{{ result.profile.file_info.last_modified }}</td>
-                    </tr>
-                </table>
-            </div>
-            
-            <!-- System State Tab -->
-            <div id="system" class="tabcontent">
-                <h3>System Anomalies</h3>
-                <h4>New Processes ({{ result.profile.system_state.new_processes|length }})</h4>
-                <table>
-                    <tr>
-                        <th>PID</th>
-                        <th>Name</th>
-                        <th>User</th>
-                    </tr>
-                    {% for proc in result.profile.system_state.new_processes %}
-                    <tr>
-                        <td>{{ proc.pid }}</td>
-                        <td>{{ proc.name }}</td>
-                        <td>{{ proc.username }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3">No new processes detected</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-                
-                <h4>Suspicious Connections ({{ result.profile.system_state.suspicious_connections|length }})</h4>
-                <table>
-                    <tr>
-                        <th>Local Address</th>
-                        <th>Remote Address</th>
-                        <th>Status</th>
-                    </tr>
-                    {% for conn in result.profile.system_state.suspicious_connections %}
-                    <tr>
-                        <td>{{ conn.laddr.ip }}:{{ conn.laddr.port }}</td>
-                        <td>{{ conn.raddr.ip }}:{{ conn.raddr.port }}</td>
-                        <td>{{ conn.status }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3">No suspicious connections detected</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            
-            <!-- Raw Data Tab -->
-            <div id="raw" class="tabcontent">
-                <button onclick="toggleJson()" class="btn">Toggle Raw JSON</button>
-                <div id="jsonData" class="json-data">
-                    {{ result|tojson|safe }}
-                </div>
-            </div>
-            
-            <!-- Recommended Actions -->
-            {% if result.alert %}
-            <div class="actions">
-                <h3>Recommended Actions</h3>
-                <ul>
-                    {% for action in result.alert.recommended_actions %}
-                    <li>{{ action }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
+            {% for key, value in result.items() %}
+                {% if key not in ['status', 'filename'] %}
+                    <div class="result-item">
+                        <span class="label">{{ key|replace('_', ' ')|title }}:</span>
+                        {% if value is mapping %}
+                            <pre>{{ value|tojson|safe }}</pre>
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
         {% endif %}
         
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="{{ url_for('upload_file') }}" class="btn">Analyze Another File</a>
-        </div>
+        <a href="{{ url_for('upload_file') }}" class="btn">Analyze Another File</a>
     </div>
-    
-    <script>
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-        
-        function toggleJson() {
-            var x = document.getElementById("jsonData");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
-        }
-    </script>
 </body>
 </html>
