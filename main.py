@@ -37,7 +37,7 @@ def upload_file():
             file.save(filepath)
             
             
-            result = engine.analyze_file(filepath)
+            result = engine.analyze(filepath)
             
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
