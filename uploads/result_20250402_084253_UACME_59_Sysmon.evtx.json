@@ -1,0 +1,6 @@
+{
+  "status": "error",
+  "error": "Analysis failed: name 'os' is not defined",
+  "filename": "UACME_59_Sysmon.evtx",
+  "debug_info": "NameError"
+}

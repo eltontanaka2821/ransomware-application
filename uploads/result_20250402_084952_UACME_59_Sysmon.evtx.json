@@ -1,0 +1,19 @@
+{
+  "filename": "UACME_59_Sysmon.evtx",
+  "filepath": "uploads\\UACME_59_Sysmon.evtx",
+  "status": "success",
+  "timestamp": "2025-04-02 08:49:52.228503",
+  "analysis": {
+    "apis": [],
+    "network": {
+      "suspicious": false,
+      "connections": []
+    },
+    "process_tree": [],
+    "file_hashes": {
+      "md5": "d41d8cd98f00b204e9800998ecf8427e",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "risk_score": 0
+}

@@ -18,7 +18,8 @@ def safe_analyze(filepath):
     """Wrapper to ensure analysis results are always properly formatted"""
     try:
         result = engine.analyze(filepath)
-        # Ensure result is a dictionary
+        
+        # Ensure result is a dictionary and properly structured
         if not isinstance(result, dict):
             result = {'status': 'error', 'error': 'Invalid result format'}
         
@@ -26,12 +27,21 @@ def safe_analyze(filepath):
         if 'filename' not in result:
             result['filename'] = os.path.basename(filepath)
             
+        # Validate nested structures (prevent "string indices must be integers")
+        if 'events' in result and isinstance(result['events'], list):
+            for event in result['events']:
+                if not isinstance(event, dict):
+                    result['status'] = 'error'
+                    result['error'] = 'Event data must be a dictionary'
+                    break
+        
         return result
     except Exception as e:
         return {
             'status': 'error',
-            'error': str(e),
-            'filename': os.path.basename(filepath)
+            'error': f"Analysis failed: {str(e)}",
+            'filename': os.path.basename(filepath),
+            'debug_info': str(e.__class__.__name__)  # Helps diagnose the issue
         }
 
 @app.route('/', methods=['GET', 'POST'])
@@ -54,26 +64,26 @@ def upload_file():
             
             result = safe_analyze(filepath)
             
-            # Ensure result is JSON serializable
+            # Ensure JSON serialization works
             try:
-                json_result = json.dumps(result, indent=2)
+                json_result = json.dumps(result, indent=2, default=str)  # Handles datetime
                 result = json.loads(json_result)  # Convert back to dict
-            except:
+            except Exception as e:
                 result = {
                     'status': 'error',
-                    'error': 'Could not serialize results',
+                    'error': f"Result serialization failed: {str(e)}",
                     'filename': filename
                 }
             
+            # Save results with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             result_filename = f"result_{timestamp}_{filename}.json"
             result_path = os.path.join(app.config['UPLOAD_FOLDER'], result_filename)
             
             with open(result_path, 'w') as f:
-                json.dump(result, f, indent=2)
+                json.dump(result, f, indent=2, default=str)
             
-            return render_template('results.html', 
-                                result=result)
+            return render_template('results.html', result=result)
     
     return render_template('upload.html')
 
@@ -88,11 +98,11 @@ def show_results(result_file):
     try:
         with open(result_path, 'r') as f:
             result = json.load(f)
-            
+        
         # Validate loaded result
         if not isinstance(result, dict):
             result = {'status': 'error', 'error': 'Invalid result format'}
-            
+        
         return render_template('results.html', result=result)
     except Exception as e:
         return render_template('results.html', 

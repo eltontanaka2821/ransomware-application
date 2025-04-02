@@ -1,0 +1,6 @@
+{
+  "status": "error",
+  "error": "Analysis failed: string indices must be integers, not 'str'",
+  "filename": "UACME_59_Sysmon.evtx",
+  "debug_info": "TypeError"
+}

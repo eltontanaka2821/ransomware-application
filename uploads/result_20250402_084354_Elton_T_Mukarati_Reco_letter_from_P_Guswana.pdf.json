@@ -1,0 +1,6 @@
+{
+  "status": "error",
+  "error": "Analysis failed: name 'os' is not defined",
+  "filename": "Elton_T_Mukarati_Reco_letter_from_P_Guswana.pdf",
+  "debug_info": "NameError"
+}
